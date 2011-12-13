@@ -1,0 +1,13 @@
+apply plugin: 'groovy'
+apply plugin: 'maven'
+
+dependencies {
+  compile gradleApi()
+  groovy localGroovy()
+}
+
+group = 'org.jenkins-ci.tools'
+version = '0.1-SNAPSHOT'
+archivesBaseName = 'gradle-hpi-plugin'
+description = 'Gradle plugin for building and packaging Jenkins plugins'
+
