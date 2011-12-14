@@ -31,6 +31,7 @@ import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.plugins.WarPlugin
 import org.gradle.api.plugins.WarPluginConvention
 import org.gradle.api.tasks.SourceSet
+import org.gradle.api.file.FileCollection
 
 /**
  * Loads HPI related tasks into the current project.
@@ -74,11 +75,7 @@ public class HpiPlugin implements Plugin<Project> {
                                 SourceSet.MAIN_SOURCE_SET_NAME).runtimeClasspath
                 }
                 task.classpath {
-                    def runtimeClasspath = project.convention.getPlugin(JavaPluginConvention)
-                            .sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).runtimeClasspath;
-                    def providedRuntime = project.configurations.getByName(
-                            WarPlugin.PROVIDED_RUNTIME_CONFIGURATION_NAME);
-                    return runtimeClasspath.minus(providedRuntime);
+                    ext.runtimeClasspath;
                 }
                 task.archiveName = "${ext.shortName}.hpi";
             }

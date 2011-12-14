@@ -1,6 +1,10 @@
 package org.jenkinsci.gradle.plugins.hpi
 
 import org.gradle.api.Project
+import org.gradle.api.file.FileCollection
+import org.gradle.api.plugins.JavaPluginConvention
+import org.gradle.api.tasks.SourceSet
+import org.gradle.api.plugins.WarPlugin
 
 /**
  * This gets exposed to the project as 'hpi' to offer additional convenience methods.
@@ -105,6 +109,19 @@ class HpiExtension {
      */
     void setWorkDir(File workDir) {
         this.workDir = workDir
+    }
+
+    /**
+     * Runtime dependencies
+     */
+    public FileCollection getRuntimeClasspath() {
+        def providedRuntime = project.configurations.getByName(WarPlugin.PROVIDED_RUNTIME_CONFIGURATION_NAME);
+        return mainSourceTree().runtimeClasspath.minus(providedRuntime)
+    }
+
+    public SourceSet mainSourceTree() {
+        return project.convention.getPlugin(JavaPluginConvention)
+                .sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
     }
 
 
