@@ -64,21 +64,18 @@ public class HpiPlugin implements Plugin<Project> {
         def ext = new HpiExtension(project)
         project.extensions.jenkinsPlugin = ext;
 
-
-        project.tasks.withType(Hpi, new Action<Hpi>() {
-            public void execute(Hpi task) {
-                task.from {
-                    return warConvention.webAppDir;
-                }
-                task.dependsOn {
-                    ext.mainSourceTree().runtimeClasspath
-                }
-                task.classpath {
-                    ext.runtimeClasspath;
-                }
-                task.archiveName = "${ext.shortName}.hpi";
+        project.tasks.withType(Hpi) { Hpi task ->
+            task.from {
+                return warConvention.webAppDir;
             }
-        });
+            task.dependsOn {
+                ext.mainSourceTree().runtimeClasspath
+            }
+            task.classpath {
+                ext.runtimeClasspath;
+            }
+            task.archiveName = "${ext.shortName}.hpi";
+        }
         project.tasks.withType(ServerTask) { ServerTask task ->
             task.dependsOn {
                 ext.mainSourceTree().runtimeClasspath
