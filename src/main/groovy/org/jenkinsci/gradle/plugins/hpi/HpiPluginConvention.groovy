@@ -18,22 +18,9 @@ package org.jenkinsci.gradle.plugins.hpi
 import org.gradle.api.Project
 
 public class HpiPluginConvention {
-  /**
-   * The name of the web application directory, relative to the project directory.
-   */
-  String webAppDirName
-
   final Project project
 
   def HpiPluginConvention(Project project) {
     this.project = project
-    webAppDirName = 'src/main/webapp'
-  }
-
-  /**
-   * Returns the web application directory.
-   */
-  File getWebAppDir() {
-    project.file(webAppDirName)
   }
 }

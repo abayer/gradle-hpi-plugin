@@ -19,18 +19,18 @@ class HpiExtension {
      */
     public void dependOnCore(String version) {
         project.repositories {
-          mavenLocal()
-          mavenCentral()
-          maven {
-            url "http://maven.glassfish.org/content/groups/public/"
-          }
+            mavenLocal()
+            mavenCentral()
+            maven {
+                url "http://maven.glassfish.org/content/groups/public/"
+            }
         }
 
         project.dependencies {
-          providedCompile(
-            [group: 'org.jenkins-ci.main', name: 'jenkins-core', version: version, ext: 'jar', transitive: true],
-            [group: 'javax.servlet', name: 'servlet-api', version: '2.4']
-          )
+            jenkinsCore(
+                [group: 'org.jenkins-ci.main', name: 'jenkins-core', version: version, ext: 'jar', transitive: true],
+                [group: 'javax.servlet', name: 'servlet-api', version: '2.4']
+            )
         }
 
     }

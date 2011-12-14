@@ -25,6 +25,8 @@ import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact;
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet;
+import org.gradle.api.plugins.WarPlugin;
+import org.gradle.api.plugins.WarPluginConvention;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.JavaPlugin;
@@ -40,21 +42,24 @@ import java.util.concurrent.Callable;
  * @author Hans Dockter
  */
 public class HpiPlugin implements Plugin<Project> {
-    public static final String PROVIDED_COMPILE_CONFIGURATION_NAME = "providedCompile";
-    public static final String PROVIDED_RUNTIME_CONFIGURATION_NAME = "providedRuntime";
+    public static final String CORE_DEPENDENCY_CONFIGURATION_NAME = "jenkinsCore";
     public static final String HPI_TASK_NAME = "hpi";
     public static final String WEB_APP_GROUP = "web application";
 
     public void apply(final Project project) {
         project.getPlugins().apply(JavaPlugin.class);
+        project.getPlugins().apply(WarPlugin.class);
         final HpiPluginConvention pluginConvention = new HpiPluginConvention(project);
         project.getConvention().getPlugins().put("hpi", pluginConvention);
 
+        final WarPluginConvention warConvention = project.getConvention().getPlugin(WarPluginConvention.class);
+        
+        
         project.getTasks().withType(Hpi.class, new Action<Hpi>() {
             public void execute(Hpi task) {
                 task.from(new Callable() {
                     public Object call() throws Exception {
-                        return pluginConvention.getWebAppDir();
+                        return warConvention.getWebAppDir();
                     }
                 });
                 task.dependsOn(new Callable() {
@@ -63,15 +68,15 @@ public class HpiPlugin implements Plugin<Project> {
                                 SourceSet.MAIN_SOURCE_SET_NAME).getRuntimeClasspath();
                     }
                 });
-                task.classpath(new Object[] {new Callable() {
+                task.classpath(new Callable() {
                     public Object call() throws Exception {
                         FileCollection runtimeClasspath = project.getConvention().getPlugin(JavaPluginConvention.class)
                                 .getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME).getRuntimeClasspath();
                         Configuration providedRuntime = project.getConfigurations().getByName(
-                                PROVIDED_RUNTIME_CONFIGURATION_NAME);
+                                WarPlugin.PROVIDED_RUNTIME_CONFIGURATION_NAME);
                         return runtimeClasspath.minus(providedRuntime);
                     }
-                }});
+                });
             }
         });
         
@@ -81,16 +86,12 @@ public class HpiPlugin implements Plugin<Project> {
         project.getExtensions().getByType(DefaultArtifactPublicationSet.class).addCandidate(new ArchivePublishArtifact(war));
         configureConfigurations(project.getConfigurations());
 
-        project.getExtensions().add("hpi",new HpiExtension(project));
+        project.getExtensions().add("hpi", new HpiExtension(project));
     }
 
     public void configureConfigurations(ConfigurationContainer configurationContainer) {
-        Configuration provideCompileConfiguration = configurationContainer.add(PROVIDED_COMPILE_CONFIGURATION_NAME).setVisible(false).
-                setDescription("Additional compile classpath for libraries that should not be part of the WAR archive.");
-        Configuration provideRuntimeConfiguration = configurationContainer.add(PROVIDED_RUNTIME_CONFIGURATION_NAME).setVisible(false).
-                extendsFrom(provideCompileConfiguration).
-                setDescription("Additional runtime classpath for libraries that should not be part of the WAR archive.");
-        configurationContainer.getByName(JavaPlugin.COMPILE_CONFIGURATION_NAME).extendsFrom(provideCompileConfiguration);
-        configurationContainer.getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME).extendsFrom(provideRuntimeConfiguration);
+        Configuration jenkinsCoreConfiguration = configurationContainer.add(CORE_DEPENDENCY_CONFIGURATION_NAME).setVisible(false).
+                setDescription("Jenkins core that your plugin is built against");
+        configurationContainer.getByName(WarPlugin.PROVIDED_COMPILE_CONFIGURATION_NAME).extendsFrom(jenkinsCoreConfiguration);
     }
 }
