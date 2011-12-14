@@ -16,7 +16,7 @@ group = "org.jenkinsci.plugins"
 version = "1.0-SNAPSHOT"
 apply plugin: 'hpi'
 
-hpi {
+jenkinsPlugin {
     coreVersion = '1.409'
     displayName = 'Our first gradle plugin'
 }
