@@ -86,6 +86,11 @@ public class HpiPlugin implements Plugin<Project> {
         server.description = "Run Jenkins in place with the plugin being developed";
         server.group = BasePlugin.BUILD_GROUP; // TODO
 
+        def stubs = project.tasks.add(StaplerGroovyStubsTask.TASK_NAME, StaplerGroovyStubsTask)
+        stubs.description = "Generates the Java stubs from Groovy source to enable Stapler annotation processing."
+        stubs.group = BasePlugin.BUILD_GROUP
+
+        project.tasks.compileJava.dependsOn(StaplerGroovyStubsTask.TASK_NAME)
         configureConfigurations(project.configurations);
     }
 
