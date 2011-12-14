@@ -47,33 +47,27 @@ public class HpiPlugin implements Plugin<Project> {
         project.plugins.apply(JavaPlugin);
         project.plugins.apply(WarPlugin);
         def pluginConvention = new HpiPluginConvention(project);
-        project.convention.hpi = pluginConvention
+        project.convention.plugins["hpi"] = pluginConvention
 
         def warConvention = project.convention.getPlugin(WarPluginConvention);
         
         
         project.getTasks().withType(Hpi.class, new Action<Hpi>() {
             public void execute(Hpi task) {
-                task.from(new Callable() {
-                    public Object call() throws Exception {
-                        return warConvention.webAppDir;
-                    }
-                });
-                task.dependsOn(new Callable() {
-                    public Object call() throws Exception {
-                        return project.convention.getPlugin(JavaPluginConvention).sourceSets.getByName(
-                                SourceSet.MAIN_SOURCE_SET_NAME).runtimeClasspath;
-                    }
-                });
-                task.classpath(new Callable() {
-                    public Object call() throws Exception {
-                        def runtimeClasspath = project.convention.getPlugin(JavaPluginConvention)
-                                .sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).runtimeClasspath;
-                        def providedRuntime = project.configurations.getByName(
-                                WarPlugin.PROVIDED_RUNTIME_CONFIGURATION_NAME);
-                        return runtimeClasspath.minus(providedRuntime);
-                    }
-                });
+                task.from {
+                    return warConvention.webAppDir;
+                }
+                task.dependsOn {
+                    project.convention.getPlugin(JavaPluginConvention).sourceSets.getByName(
+                                SourceSet.MAIN_SOURCE_SET_NAME).runtimeClasspath
+                }
+                task.classpath {
+                    def runtimeClasspath = project.convention.getPlugin(JavaPluginConvention)
+                            .sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).runtimeClasspath;
+                    def providedRuntime = project.configurations.getByName(
+                            WarPlugin.PROVIDED_RUNTIME_CONFIGURATION_NAME);
+                    return runtimeClasspath.minus(providedRuntime);
+                }
                 task.archiveName = "${pluginConvention.shortName}.hpi";
                 task.configureManifest();
             }

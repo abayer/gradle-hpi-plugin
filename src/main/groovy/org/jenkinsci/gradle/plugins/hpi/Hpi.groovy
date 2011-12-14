@@ -18,6 +18,7 @@ package org.jenkinsci.gradle.plugins.hpi
 
 import java.text.SimpleDateFormat
 import org.gradle.api.Project
+import org.gradle.api.plugins.BasePluginConvention
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.bundling.War
