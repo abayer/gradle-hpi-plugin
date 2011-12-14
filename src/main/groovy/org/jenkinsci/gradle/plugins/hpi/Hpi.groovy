@@ -35,11 +35,17 @@ class Hpi extends War {
         extension = HPI_EXTENSION
     }
 
+    @Override
+    protected void copy() {
+        configureManifest();
+        super.copy()
+    }
+
     /**
      * Configures the manifest generation.
      */
     protected void configureManifest() {
-        def conv = project.convention.getPlugin(HpiPluginConvention)
+        def conv = project.extensions.getByType(HpiExtension)
         def classDir = project.convention.getPlugin(JavaPluginConvention).sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).output.classesDir;
 
         def attrs = [:]
@@ -94,4 +100,6 @@ class Hpi extends War {
 
         manifest.attributes(attrs)
     }
+
+    public static final String TASK_NAME = "hpi";
 }

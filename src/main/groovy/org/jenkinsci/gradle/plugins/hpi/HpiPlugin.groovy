@@ -39,20 +39,32 @@ import org.gradle.api.tasks.SourceSet
  * @author Kohsuke Kawaguchi
  */
 public class HpiPlugin implements Plugin<Project> {
+    /**
+     * Represents the dependency to the Jenkins core.
+     */
     public static final String CORE_DEPENDENCY_CONFIGURATION_NAME = "jenkinsCore";
-    public static final String HPI_TASK_NAME = "hpi";
+
+    /**
+     * Represents the dependency to the Jenkins war. Test scope.
+     */
+    public static final String WAR_DEPENDENCY_CONFIGURATION_NAME = "jenkinsWar";
+
+
     public static final String WEB_APP_GROUP = "web application";
 
     public void apply(final Project project) {
         project.plugins.apply(JavaPlugin);
         project.plugins.apply(WarPlugin);
-        def pluginConvention = new HpiPluginConvention(project);
+        def pluginConvention = new HpiPluginConvention();
         project.convention.plugins["hpi"] = pluginConvention
 
         def warConvention = project.convention.getPlugin(WarPluginConvention);
-        
-        
-        project.getTasks().withType(Hpi.class, new Action<Hpi>() {
+
+        def ext = new HpiExtension(project)
+        project.extensions.jenkinsPlugin = ext;
+
+
+        project.tasks.withType(Hpi, new Action<Hpi>() {
             public void execute(Hpi task) {
                 task.from {
                     return warConvention.webAppDir;
@@ -68,24 +80,29 @@ public class HpiPlugin implements Plugin<Project> {
                             WarPlugin.PROVIDED_RUNTIME_CONFIGURATION_NAME);
                     return runtimeClasspath.minus(providedRuntime);
                 }
-                task.archiveName = "${pluginConvention.shortName}.hpi";
-                task.configureManifest();
+                task.archiveName = "${ext.shortName}.hpi";
             }
         });
         
-        def war = project.tasks.add(HPI_TASK_NAME, Hpi);
-        war.description = "Generates the HPI package";
-        war.group = BasePlugin.BUILD_GROUP;
-        project.extensions.getByType(DefaultArtifactPublicationSet).addCandidate(new ArchivePublishArtifact(war));
-        configureConfigurations(project.configurations);
+        def hpi = project.tasks.add(Hpi.TASK_NAME, Hpi);
+        hpi.description = "Generates the HPI package";
+        hpi.group = BasePlugin.BUILD_GROUP;
+        project.extensions.getByType(DefaultArtifactPublicationSet).addCandidate(new ArchivePublishArtifact(hpi));
 
-        project.extensions.hpi = new HpiExtension(project);
+        def server = project.tasks.add(ServerTask.TASK_NAME, ServerTask);
+        server.description = "Run Jenkins in place with the plugin being developed";
+        server.group = BasePlugin.BUILD_GROUP; // TODO
+
+        configureConfigurations(project.configurations);
     }
 
-    public void configureConfigurations(ConfigurationContainer configurationContainer) {
-        Configuration jenkinsCoreConfiguration = configurationContainer.add(CORE_DEPENDENCY_CONFIGURATION_NAME).setVisible(false).
+    public void configureConfigurations(ConfigurationContainer cc) {
+        Configuration jenkinsCoreConfiguration = cc.add(CORE_DEPENDENCY_CONFIGURATION_NAME).setVisible(false).
                 setDescription("Jenkins core that your plugin is built against");
-        configurationContainer.getByName(WarPlugin.PROVIDED_COMPILE_CONFIGURATION_NAME).extendsFrom(jenkinsCoreConfiguration);
+        cc.getByName(WarPlugin.PROVIDED_COMPILE_CONFIGURATION_NAME).extendsFrom(jenkinsCoreConfiguration);
+
+        cc.add(WAR_DEPENDENCY_CONFIGURATION_NAME).setVisible(false).
+                setDescription("Jenkins war that corresponds to the Jenkins core");
     }
 
 }
