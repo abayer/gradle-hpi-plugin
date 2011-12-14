@@ -62,7 +62,7 @@ class HpiExtension {
      * TODO: document
      */
     public boolean sandboxStatus;
-
+    
     /**
      * TODO: document
      */
@@ -98,8 +98,25 @@ class HpiExtension {
         }
     }
     
-    private File workDir;
+    private String staplerStubDir
 
+    /**
+     * Sets the stapler stubs output directory
+     */
+    void setStaplerStubDir(String staplerStubDir) {
+        this.staplerStubDir = staplerStubDir
+    }
+    
+    /**
+     * Returns the Stapler stubs directory.
+     */
+    File getStaplerStubDir() {
+        def stubDir = staplerStubDir ?: 'generated-src/stubs'
+        project.file("${project.buildDir}/${stubDir}")
+    }
+    
+    private File workDir;
+    
     File getWorkDir() {
         return workDir ?: new File(project.rootDir,"work");
     }

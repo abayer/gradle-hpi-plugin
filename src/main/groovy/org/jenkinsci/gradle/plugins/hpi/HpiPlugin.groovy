@@ -51,7 +51,7 @@ public class HpiPlugin implements Plugin<Project> {
     public void apply(final Project project) {
         project.plugins.apply(JavaPlugin);
         project.plugins.apply(WarPlugin);
-        def pluginConvention = new HpiPluginConvention(project);
+        def pluginConvention = new HpiPluginConvention();
         project.convention.plugins["hpi"] = pluginConvention
 
         def warConvention = project.convention.getPlugin(WarPluginConvention);
@@ -77,7 +77,7 @@ public class HpiPlugin implements Plugin<Project> {
             }
         }
         project.tasks.withType(StaplerGroovyStubsTask) { StaplerGroovyStubsTask task ->
-          task.destinationDir = pluginConvention.getStaplerStubDir()
+            task.destinationDir = ext.getStaplerStubDir()
         }
 
         def hpi = project.tasks.add(Hpi.TASK_NAME, Hpi);
