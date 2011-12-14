@@ -1,9 +1,9 @@
 package org.jenkinsci.gradle.plugins.hpi
 
-import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.TaskAction
 import java.util.jar.JarFile
+import org.gradle.api.DefaultTask
 import org.gradle.api.plugins.WarPluginConvention
+import org.gradle.api.tasks.TaskAction
 
 /**
  * Task that starts Jenkins in place with the current plugin.

@@ -17,8 +17,6 @@
 package org.jenkinsci.gradle.plugins.hpi;
 
 
-import java.util.concurrent.Callable
-import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -27,11 +25,8 @@ import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.plugins.WarPlugin
 import org.gradle.api.plugins.WarPluginConvention
-import org.gradle.api.tasks.SourceSet
-import org.gradle.api.file.FileCollection
 
 /**
  * Loads HPI related tasks into the current project.

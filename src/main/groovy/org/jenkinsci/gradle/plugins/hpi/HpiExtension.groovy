@@ -3,8 +3,8 @@ package org.jenkinsci.gradle.plugins.hpi
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.JavaPluginConvention
-import org.gradle.api.tasks.SourceSet
 import org.gradle.api.plugins.WarPlugin
+import org.gradle.api.tasks.SourceSet
 
 /**
  * This gets exposed to the project as 'hpi' to offer additional convenience methods.

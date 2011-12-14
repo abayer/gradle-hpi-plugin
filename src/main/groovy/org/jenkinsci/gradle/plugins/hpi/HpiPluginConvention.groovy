@@ -15,8 +15,6 @@
  */
 package org.jenkinsci.gradle.plugins.hpi
 
-import org.gradle.api.Project
-
 public class HpiPluginConvention {
 
 
