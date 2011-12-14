@@ -77,6 +77,8 @@ public class HpiPlugin implements Plugin<Project> {
                         return runtimeClasspath.minus(providedRuntime);
                     }
                 });
+                task.setArchiveName(pluginConvention.getShortName()+".hpi");
+                task.configureManifest();
             }
         });
         
@@ -94,4 +96,5 @@ public class HpiPlugin implements Plugin<Project> {
                 setDescription("Jenkins core that your plugin is built against");
         configurationContainer.getByName(WarPlugin.PROVIDED_COMPILE_CONFIGURATION_NAME).extendsFrom(jenkinsCoreConfiguration);
     }
+
 }

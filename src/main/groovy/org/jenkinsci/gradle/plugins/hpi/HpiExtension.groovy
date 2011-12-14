@@ -14,24 +14,5 @@ class HpiExtension {
         this.project = project
     }
 
-    /**
-     * Set up the Jenkins core dependency (and repositories to resolve it)
-     */
-    public void dependOnCore(String version) {
-        project.repositories {
-            mavenLocal()
-            mavenCentral()
-            maven {
-                url "http://maven.glassfish.org/content/groups/public/"
-            }
-        }
 
-        project.dependencies {
-            jenkinsCore(
-                [group: 'org.jenkins-ci.main', name: 'jenkins-core', version: version, ext: 'jar', transitive: true],
-                [group: 'javax.servlet', name: 'servlet-api', version: '2.4']
-            )
-        }
-
-    }
 }

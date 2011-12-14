@@ -8,13 +8,15 @@ buildscript {
     mavenLocal()
   }
   dependencies {
-  classpath group: 'org.jenkins-ci.tools', name: 'gradle-hpi-plugin', version: '0.1-SNAPSHOT'
+    classpath group: 'org.jenkins-ci.tools', name: 'gradle-hpi-plugin', version: '0.1-SNAPSHOT'
   }
 }
 
 group = "org.jenkinsci.plugins"
 version = "1.0-SNAPSHOT"
-archivesBaseName = 'hello-world'
 apply plugin: 'hpi'
 
-hpi.dependOnCore('1.409')
+hpi {
+    coreVersion = '1.409'
+    displayName = 'Our first gradle plugin'
+}

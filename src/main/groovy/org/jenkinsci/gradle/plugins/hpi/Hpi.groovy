@@ -16,135 +16,81 @@
 
 package org.jenkinsci.gradle.plugins.hpi
 
-import org.gradle.api.file.CopySpec
-import org.gradle.api.file.FileCollection
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputFile;
-import org.gradle.util.ConfigureUtil
-import org.gradle.api.internal.file.copy.CopySpecImpl
-import org.gradle.api.tasks.bundling.Jar
-import org.gradle.util.GUtil;
-import org.gradle.api.plugins.BasePluginConvention
+import java.text.SimpleDateFormat
+import org.gradle.api.Project
+import org.gradle.api.plugins.JavaPluginConvention
+import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.bundling.War
 
 /**
  * Assembles an hpi archive.
  *
- * @author Hans Dockter
- * @author Andrew Bayer
+ * @author Kohsuke Kawaguchi
  */
-
-class Hpi extends Jar {
+class Hpi extends War {
     public static final String HPI_EXTENSION = 'hpi'
-
-    private File webXml
-
-    private FileCollection classpath
-    private final CopySpecImpl webInf
 
     Hpi() {
         extension = HPI_EXTENSION
-        // Add these as separate specs, so they are not affected by the changes to the main spec
-        webInf = copyAction.rootSpec.addChild().into('WEB-INF')
-        webInf.into('classes') {
-            from {
-                def classpath = getClasspath()
-                classpath ? classpath.filter {File file -> file.isDirectory()} : []
-            }
+    }
+
+    /**
+     * Configures the manifest generation.
+     */
+    protected void configureManifest() {
+        def conv = project.convention.getPlugin(HpiPluginConvention)
+        def classDir = project.convention.getPlugin(JavaPluginConvention).sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).output.classesDir;
+
+        def attrs = [:]
+
+        File pluginImpl = new File(classDir, "META-INF/services/hudson.Plugin");
+        if (pluginImpl.exists()) {
+            attrs["Plugin-Class"] = pluginImpl.readLines("UTF-8")[0]
         }
-        webInf.into('lib') {
-            from {
-                def classpath = getClasspath()
-                classpath ? classpath.filter {File file -> file.isFile()} : []
-            }
+
+        attrs["Group-Id"] = project.group;
+        attrs["Short-Name"] = conv.shortName;
+        attrs["Long-Name"] = conv.displayName;
+        attrs["Url"] = conv.url;
+        attrs["Compatible-Since-Version"] = conv.compatibleSinceVersion;
+        if (conv.sandboxStatus)
+            attrs["Sandbox-Status"] = conv.sandboxStatus;
+
+        v = project.version
+        if (v==Project.DEFAULT_VERSION)     v = "1.0-SNAPSHOT";
+        if(v.toString().endsWith("-SNAPSHOT")) {
+            String dt = new SimpleDateFormat("MM/dd/yyyy HH:mm").format(new Date());
+            v += " (private-"+dt+"-"+System.getProperty("user.name")+")";
         }
-        webInf.into('') {
-            from {
-                getWebXml()
-            }
-            rename {
-                'web.xml'
-            }
+        attrs["Plugin-Version"] = v;
+
+        attrs["Jenkins-Version"] = conv.coreVersion;
+
+        attrs["Mask-Classes"] = conv.maskClasses;
+
+        // TODO
+        // String dep = findDependencyProjects();
+        // if(dep.length()>0)
+        //    attrs["Plugin-Dependencies"] = dep;
+
+        // more TODO
+/*
+        if(pluginFirstClassLoader)
+            mainSection.addAttributeAndCheck( new Attribute( "PluginFirstClassLoader", "true" ) );
+
+        if (project.getDevelopers() != null) {
+            mainSection.addAttributeAndCheck(new Attribute("Plugin-Developers",getDevelopersForManifest()));
         }
-    }
 
-    CopySpec getWebInf() {
-        return webInf.addChild()
-    }
+        Boolean b = isSupportDynamicLoading();
+        if (b!=null)
+            mainSection.addAttributeAndCheck(new Attribute("Support-Dynamic-Loading",b.toString()));
+*/
+        // remove null values
+        for (Iterator itr = attrs.entrySet().iterator(); itr.hasNext();) {
+            if (itr.next().value==null) itr.remove();
+        }
 
-  /**
-     * The path where the archive is constructed. The path is simply the {@code destinationDir} plus the {@code archiveName}.
-     *
-     * @return a File object with the path to the archive
-     */
-    @OutputFile
-    public File getArchivePath() {
-      return new File(getDestinationDir(), GUtil.elvis(project.archivesBaseName, "") + "." + extension)
-    }
-
-    /**
-     * Adds some content to the {@code WEB-INF} directory for this hpi archive.
-     *
-     * <p>The given closure is executed to configure a {@link CopySpec}. The {@code CopySpec} is passed to the closure
-     * as its delegate.
-     *
-     * @param configureClosure The closure to execute
-     * @return The newly created {@code CopySpec}.
-     */
-    CopySpec webInf(Closure configureClosure) {
-        return ConfigureUtil.configure(configureClosure, getWebInf())
-    }
-
-    /**
-     * Returns the classpath to include in the hpi archive. Any JAR or ZIP files in this classpath are included in the
-     * {@code WEB-INF/lib} directory. Any directories in this classpath are included in the {@code WEB-INF/classes}
-     * directory.
-     *
-     * @return The classpath. Returns an empty collection when there is no classpath to include in the hpi.
-     */
-    @InputFiles @Optional
-    FileCollection getClasspath() {
-        return classpath
-    }
-
-    /**
-     * Sets the classpath to include in the hpi archive.
-     *
-     * @param classpath The classpath. Must not be null.
-     */
-    void setClasspath(Object classpath) {
-        this.classpath = project.files(classpath)
-    }
-
-    /**
-     * Adds files to the classpath to include in the hpi archive.
-     *
-     * @param classpath The files to add. These are evaluated as for {@link org.gradle.api.Project#files(Object [])}
-     */
-    void classpath(Object... classpath) {
-        FileCollection oldClasspath = getClasspath()
-        this.classpath = project.files(oldClasspath ?: [], classpath)
-    }
-
-    /**
-     * Returns the {@code web.xml} file to include in the hpi archive. When {@code null}, no {@code web.xml} file is
-     * included in the hpi.
-     *
-     * @return The {@code web.xml} file.
-     */
-    @InputFile @Optional
-    public File getWebXml() {
-        return webXml;
-    }
-
-    /**
-     * Sets the {@code web.xml} file to include in the hpi archive. When {@code null}, no {@code web.xml} file is
-     * included in the hpi.
-     *
-     * @param webXml The {@code web.xml} file. Maybe null.
-     */
-    public void setWebXml(File webXml) {
-        this.webXml = webXml;
+        manifest.attributes(attrs)
     }
 }
