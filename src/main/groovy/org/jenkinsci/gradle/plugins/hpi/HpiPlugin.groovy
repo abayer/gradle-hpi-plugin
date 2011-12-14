@@ -16,30 +16,27 @@
 
 package org.jenkinsci.gradle.plugins.hpi;
 
-import org.gradle.api.Action;
-import org.gradle.api.Plugin;
-import org.gradle.api.Project;
-import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.ConfigurationContainer;
-import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
-import org.gradle.api.file.FileCollection;
-import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact;
-import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet;
-import org.gradle.api.plugins.WarPlugin;
-import org.gradle.api.plugins.WarPluginConvention;
-import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.plugins.BasePlugin;
-import org.gradle.api.plugins.JavaPlugin;
-import org.gradle.api.plugins.JavaPluginConvention;
 
-
-import java.util.concurrent.Callable;
+import java.util.concurrent.Callable
+import org.gradle.api.Action
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.ConfigurationContainer
+import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
+import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
+import org.gradle.api.plugins.BasePlugin
+import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.plugins.JavaPluginConvention
+import org.gradle.api.plugins.WarPlugin
+import org.gradle.api.plugins.WarPluginConvention
+import org.gradle.api.tasks.SourceSet
 
 /**
- * <p>A {@link Plugin} which extends the {@link JavaPlugin} to add tasks which assemble a web application into a WAR
- * file.</p>
+ * Loads HPI related tasks into the current project.
  *
  * @author Hans Dockter
+ * @author Kohsuke Kawaguchi
  */
 public class HpiPlugin implements Plugin<Project> {
     public static final String CORE_DEPENDENCY_CONFIGURATION_NAME = "jenkinsCore";
@@ -47,48 +44,48 @@ public class HpiPlugin implements Plugin<Project> {
     public static final String WEB_APP_GROUP = "web application";
 
     public void apply(final Project project) {
-        project.getPlugins().apply(JavaPlugin.class);
-        project.getPlugins().apply(WarPlugin.class);
-        final HpiPluginConvention pluginConvention = new HpiPluginConvention(project);
-        project.getConvention().getPlugins().put("hpi", pluginConvention);
+        project.plugins.apply(JavaPlugin);
+        project.plugins.apply(WarPlugin);
+        def pluginConvention = new HpiPluginConvention(project);
+        project.convention.hpi = pluginConvention
 
-        final WarPluginConvention warConvention = project.getConvention().getPlugin(WarPluginConvention.class);
+        def warConvention = project.convention.getPlugin(WarPluginConvention);
         
         
         project.getTasks().withType(Hpi.class, new Action<Hpi>() {
             public void execute(Hpi task) {
                 task.from(new Callable() {
                     public Object call() throws Exception {
-                        return warConvention.getWebAppDir();
+                        return warConvention.webAppDir;
                     }
                 });
                 task.dependsOn(new Callable() {
                     public Object call() throws Exception {
-                        return project.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(
-                                SourceSet.MAIN_SOURCE_SET_NAME).getRuntimeClasspath();
+                        return project.convention.getPlugin(JavaPluginConvention).sourceSets.getByName(
+                                SourceSet.MAIN_SOURCE_SET_NAME).runtimeClasspath;
                     }
                 });
                 task.classpath(new Callable() {
                     public Object call() throws Exception {
-                        FileCollection runtimeClasspath = project.getConvention().getPlugin(JavaPluginConvention.class)
-                                .getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME).getRuntimeClasspath();
-                        Configuration providedRuntime = project.getConfigurations().getByName(
+                        def runtimeClasspath = project.convention.getPlugin(JavaPluginConvention)
+                                .sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).runtimeClasspath;
+                        def providedRuntime = project.configurations.getByName(
                                 WarPlugin.PROVIDED_RUNTIME_CONFIGURATION_NAME);
                         return runtimeClasspath.minus(providedRuntime);
                     }
                 });
-                task.setArchiveName(pluginConvention.getShortName()+".hpi");
+                task.archiveName = "${pluginConvention.shortName}.hpi";
                 task.configureManifest();
             }
         });
         
-        Hpi war = project.getTasks().add(HPI_TASK_NAME, Hpi.class);
-        war.setDescription("Generates the HPI package");
-        war.setGroup(BasePlugin.BUILD_GROUP);
-        project.getExtensions().getByType(DefaultArtifactPublicationSet.class).addCandidate(new ArchivePublishArtifact(war));
-        configureConfigurations(project.getConfigurations());
+        def war = project.tasks.add(HPI_TASK_NAME, Hpi);
+        war.description = "Generates the HPI package";
+        war.group = BasePlugin.BUILD_GROUP;
+        project.extensions.getByType(DefaultArtifactPublicationSet).addCandidate(new ArchivePublishArtifact(war));
+        configureConfigurations(project.configurations);
 
-        project.getExtensions().add("hpi", new HpiExtension(project));
+        project.extensions.hpi = new HpiExtension(project);
     }
 
     public void configureConfigurations(ConfigurationContainer configurationContainer) {
