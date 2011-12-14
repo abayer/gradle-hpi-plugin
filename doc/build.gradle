@@ -12,24 +12,9 @@ buildscript {
   }
 }
 
-repositories {
-  mavenLocal()
-  mavenCentral()
-  maven {
-    url "http://maven.glassfish.org/content/groups/public/"
-  }
-}
-
 group = "org.jenkinsci.plugins"
 version = "1.0-SNAPSHOT"
 archivesBaseName = 'hello-world'
 apply plugin: 'hpi'
 
-dependencies {
-  providedCompile(
-    [group: 'org.jenkins-ci.main', name: 'jenkins-core', version: '1.409', ext: 'jar', transitive: true],
-    [group: 'javax.servlet', name: 'servlet-api', version: '2.4']
-  )
-
-}
-
+hpi.dependOnCore('1.409')

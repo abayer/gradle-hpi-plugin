@@ -21,6 +21,7 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact;
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet;
@@ -75,10 +76,12 @@ public class HpiPlugin implements Plugin<Project> {
         });
         
         Hpi war = project.getTasks().add(HPI_TASK_NAME, Hpi.class);
-        war.setDescription("Generates a war archive with all the compiled classes, the web-app content and the libraries.");
+        war.setDescription("Generates the HPI package");
         war.setGroup(BasePlugin.BUILD_GROUP);
         project.getExtensions().getByType(DefaultArtifactPublicationSet.class).addCandidate(new ArchivePublishArtifact(war));
         configureConfigurations(project.getConfigurations());
+
+        project.getExtensions().add("hpi",new HpiExtension(project));
     }
 
     public void configureConfigurations(ConfigurationContainer configurationContainer) {
