@@ -71,8 +71,7 @@ public class HpiPlugin implements Plugin<Project> {
                     return warConvention.webAppDir;
                 }
                 task.dependsOn {
-                    project.convention.getPlugin(JavaPluginConvention).sourceSets.getByName(
-                                SourceSet.MAIN_SOURCE_SET_NAME).runtimeClasspath
+                    ext.mainSourceTree().runtimeClasspath
                 }
                 task.classpath {
                     ext.runtimeClasspath;
@@ -80,7 +79,12 @@ public class HpiPlugin implements Plugin<Project> {
                 task.archiveName = "${ext.shortName}.hpi";
             }
         });
-        
+        project.tasks.withType(ServerTask) { ServerTask task ->
+            task.dependsOn {
+                ext.mainSourceTree().runtimeClasspath
+            }
+        }
+
         def hpi = project.tasks.add(Hpi.TASK_NAME, Hpi);
         hpi.description = "Generates the HPI package";
         hpi.group = BasePlugin.BUILD_GROUP;
