@@ -15,7 +15,25 @@
  */
 package org.jenkinsci.gradle.plugins.hpi
 
+import org.gradle.api.Project
+
 public class HpiPluginConvention {
+  /**
+   * The name of the destination directory for generated Stapler stubs, relative to the project build directory.
+   */
+  String staplerStubDir
+  final Project project
+  
+  def HpiPluginConvention(Project project) {
+    this.project = project
+    staplerStubDir = 'generated-src/stubs'
+  }
 
-
+  /**
+   * Returns the Stapler stubs directory.
+   */
+  File getStaplerStubDir() {
+    project.file("${project.buildDir}/${staplerStubDir}")
+  }
+  
 }

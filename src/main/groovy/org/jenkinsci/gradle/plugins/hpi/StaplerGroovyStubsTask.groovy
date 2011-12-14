@@ -22,7 +22,7 @@ import org.gradle.api.tasks.OutputDirectory
 
 class StaplerGroovyStubsTask extends DefaultTask { 
   @OutputDirectory
-  File destinationDir = new File("${project.buildDir}/generated-src/stubs")
+  File destinationDir
   
   @TaskAction
   def generateStubs() {
@@ -55,5 +55,6 @@ class StaplerGroovyStubsTask extends DefaultTask {
     project.sourceSets.main.java.srcDirs += destinationDir
   }
 
+  
   public static final String TASK_NAME = "stapler"
 }
