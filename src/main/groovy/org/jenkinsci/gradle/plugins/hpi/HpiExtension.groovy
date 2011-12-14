@@ -93,4 +93,19 @@ class HpiExtension {
             jenkinsWar(group: 'org.jenkins-ci.main', name: 'jenkins-war', version: v, ext: 'war')
         }
     }
+    
+    private File workDir;
+
+    File getWorkDir() {
+        return workDir ?: new File(project.rootDir,"work");
+    }
+
+    /**
+     * Work directory to run Jenkins.war with.
+     */
+    void setWorkDir(File workDir) {
+        this.workDir = workDir
+    }
+
+
 }
