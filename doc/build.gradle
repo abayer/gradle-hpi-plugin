@@ -14,7 +14,7 @@ buildscript {
 
 group = "org.jenkinsci.plugins"
 version = "1.0-SNAPSHOT"
-apply plugin: 'hpi'
+apply plugin: 'jpi'
 
 jenkinsPlugin {
     coreVersion = '1.409'

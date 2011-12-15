@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jenkinsci.gradle.plugins.hpi
+package org.jenkinsci.gradle.plugins.jpi
 
-import org.gradle.api.Project
-
-public class HpiPluginConvention {
+public class JpiPluginConvention {
   
 }

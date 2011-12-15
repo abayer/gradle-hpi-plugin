@@ -1,4 +1,4 @@
-package org.jenkinsci.gradle.plugins.hpi
+package org.jenkinsci.gradle.plugins.jpi
 
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
@@ -11,10 +11,10 @@ import org.gradle.api.tasks.SourceSet
  *
  * @author Kohsuke Kawaguchi
  */
-class HpiExtension {
+class JpiExtension {
     final Project project
 
-    def HpiExtension(Project project) {
+    def JpiExtension(Project project) {
         this.project = project
     }
 

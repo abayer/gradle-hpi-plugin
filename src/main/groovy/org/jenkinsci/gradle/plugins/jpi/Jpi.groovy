@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jenkinsci.gradle.plugins.hpi
+package org.jenkinsci.gradle.plugins.jpi
 
 import org.gradle.api.tasks.bundling.War
 
@@ -23,18 +23,18 @@ import org.gradle.api.tasks.bundling.War
  *
  * @author Kohsuke Kawaguchi
  */
-class Hpi extends War {
+class Jpi extends War {
     public static final String HPI_EXTENSION = 'hpi'
 
-    Hpi() {
+    Jpi() {
         extension = HPI_EXTENSION
     }
 
     @Override
     protected void copy() {
-        manifest.attributes(new HpiManifest(project))
+        manifest.attributes(new JpiManifest(project))
         super.copy()
     }
 
-    public static final String TASK_NAME = "hpi";
+    public static final String TASK_NAME = "jpi";
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jenkinsci.gradle.plugins.hpi;
+package org.jenkinsci.gradle.plugins.jpi;
 
 
 import org.gradle.api.Plugin
@@ -34,7 +34,7 @@ import org.gradle.api.plugins.WarPluginConvention
  * @author Hans Dockter
  * @author Kohsuke Kawaguchi
  */
-public class HpiPlugin implements Plugin<Project> {
+public class JpiPlugin implements Plugin<Project> {
     /**
      * Represents the dependency to the Jenkins core.
      */
@@ -51,15 +51,15 @@ public class HpiPlugin implements Plugin<Project> {
     public void apply(final Project project) {
         project.plugins.apply(JavaPlugin);
         project.plugins.apply(WarPlugin);
-        def pluginConvention = new HpiPluginConvention();
+        def pluginConvention = new JpiPluginConvention();
         project.convention.plugins["hpi"] = pluginConvention
 
         def warConvention = project.convention.getPlugin(WarPluginConvention);
 
-        def ext = new HpiExtension(project)
+        def ext = new JpiExtension(project)
         project.extensions.jenkinsPlugin = ext;
 
-        project.tasks.withType(Hpi) { Hpi task ->
+        project.tasks.withType(Jpi) { Jpi task ->
             task.from {
                 return warConvention.webAppDir;
             }
@@ -80,7 +80,7 @@ public class HpiPlugin implements Plugin<Project> {
             task.destinationDir = ext.getStaplerStubDir()
         }
 
-        def hpi = project.tasks.add(Hpi.TASK_NAME, Hpi);
+        def hpi = project.tasks.add(Jpi.TASK_NAME, Jpi);
         hpi.description = "Generates the HPI package";
         hpi.group = BasePlugin.BUILD_GROUP;
         project.extensions.getByType(DefaultArtifactPublicationSet).addCandidate(new ArchivePublishArtifact(hpi));

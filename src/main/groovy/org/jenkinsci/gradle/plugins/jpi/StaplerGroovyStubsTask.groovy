@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jenkinsci.gradle.plugins.hpi
+package org.jenkinsci.gradle.plugins.jpi
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction

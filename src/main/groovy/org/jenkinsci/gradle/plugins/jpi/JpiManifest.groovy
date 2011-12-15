@@ -1,4 +1,4 @@
-package org.jenkinsci.gradle.plugins.hpi
+package org.jenkinsci.gradle.plugins.jpi
 
 import java.text.SimpleDateFormat
 import org.gradle.api.Project
@@ -10,13 +10,13 @@ import org.gradle.api.tasks.SourceSet
  *
  * @author Kohsuke Kawaguchi
  */
-class HpiManifest extends HashMap<String,Object> {
+class JpiManifest extends HashMap<String,Object> {
     private final Project project;
 
-    HpiManifest(Project project) {
+    JpiManifest(Project project) {
         this.project = project
 
-        def conv = project.extensions.getByType(HpiExtension)
+        def conv = project.extensions.getByType(JpiExtension)
         def classDir = project.convention.getPlugin(JavaPluginConvention).sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).output.classesDir;
 
         File pluginImpl = new File(classDir, "META-INF/services/hudson.Plugin");

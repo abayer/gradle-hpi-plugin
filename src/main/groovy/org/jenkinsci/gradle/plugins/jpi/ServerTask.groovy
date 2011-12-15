@@ -1,4 +1,4 @@
-package org.jenkinsci.gradle.plugins.hpi
+package org.jenkinsci.gradle.plugins.jpi
 
 import java.util.jar.JarFile
 import org.gradle.api.DefaultTask
@@ -14,7 +14,7 @@ class ServerTask extends DefaultTask {
 
     @TaskAction
     def start() {
-        def c = project.configurations.getByName(HpiPlugin.WAR_DEPENDENCY_CONFIGURATION_NAME)
+        def c = project.configurations.getByName(JpiPlugin.WAR_DEPENDENCY_CONFIGURATION_NAME)
         def files = c.resolve();
         if (files.isEmpty())
             throw new Error("No jenkins.war dependency is specified");
@@ -22,7 +22,7 @@ class ServerTask extends DefaultTask {
 
         generateHpl();
 
-        def conv = project.extensions.getByType(HpiExtension)
+        def conv = project.extensions.getByType(JpiExtension)
         System.setProperty("JENKINS_HOME",conv.workDir.getAbsolutePath())
         System.setProperty("stapler.trace","true")
         System.setProperty("debug.YUI","true")
@@ -36,9 +36,9 @@ class ServerTask extends DefaultTask {
     }
 
     void generateHpl() {
-        def conv = project.extensions.getByType(HpiExtension)
+        def conv = project.extensions.getByType(JpiExtension)
 
-        def m = new HpiManifest(project)
+        def m = new JpiManifest(project)
 
         // src/main/webApp
         def warconv = project.convention.getPlugin(WarPluginConvention);
