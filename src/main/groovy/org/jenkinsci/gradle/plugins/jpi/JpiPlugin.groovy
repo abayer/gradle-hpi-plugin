@@ -27,6 +27,7 @@ import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.WarPlugin
 import org.gradle.api.plugins.WarPluginConvention
+import org.gradle.api.plugins.GroovyPlugin
 
 /**
  * Loads HPI related tasks into the current project.
@@ -51,6 +52,7 @@ public class JpiPlugin implements Plugin<Project> {
     public void apply(final Project project) {
         project.plugins.apply(JavaPlugin);
         project.plugins.apply(WarPlugin);
+        project.plugins.apply(GroovyPlugin);
         def pluginConvention = new JpiPluginConvention();
         project.convention.plugins["hpi"] = pluginConvention
 
