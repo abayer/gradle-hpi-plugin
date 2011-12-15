@@ -7,7 +7,7 @@ import org.gradle.api.plugins.WarPlugin
 import org.gradle.api.tasks.SourceSet
 
 /**
- * This gets exposed to the project as 'hpi' to offer additional convenience methods.
+ * This gets exposed to the project as 'jpi' to offer additional convenience methods.
  *
  * @author Kohsuke Kawaguchi
  */
@@ -34,6 +34,19 @@ class JpiExtension {
         return s;
     }
 
+    private String fileExtension
+
+    /**
+     * File extension for plugin archives.
+     */
+    String getFileExtension() {
+        return fileExtension ?: "hpi"
+    }
+
+    void setFileExtension(String s) {
+        this.fileExtension = s
+    }
+  
     private String displayName;
 
     /**

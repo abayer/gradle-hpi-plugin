@@ -24,10 +24,10 @@ import org.gradle.api.tasks.bundling.War
  * @author Kohsuke Kawaguchi
  */
 class Jpi extends War {
-    public static final String HPI_EXTENSION = 'hpi'
+    public static final String JPI_EXTENSION = 'hpi'
 
     Jpi() {
-        extension = HPI_EXTENSION
+        extension = JPI_EXTENSION
     }
 
     @Override

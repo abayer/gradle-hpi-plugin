@@ -8,6 +8,6 @@ dependencies {
 
 group = 'org.jenkins-ci.tools'
 version = '0.1-SNAPSHOT'
-archivesBaseName = 'gradle-hpi-plugin'
+archivesBaseName = 'gradle-jpi-plugin'
 description = 'Gradle plugin for building and packaging Jenkins plugins'
 

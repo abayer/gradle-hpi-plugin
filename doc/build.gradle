@@ -8,7 +8,7 @@ buildscript {
     mavenLocal()
   }
   dependencies {
-    classpath group: 'org.jenkins-ci.tools', name: 'gradle-hpi-plugin', version: '0.1-SNAPSHOT'
+    classpath group: 'org.jenkins-ci.tools', name: 'gradle-jpi-plugin', version: '0.1-SNAPSHOT'
   }
 }
 

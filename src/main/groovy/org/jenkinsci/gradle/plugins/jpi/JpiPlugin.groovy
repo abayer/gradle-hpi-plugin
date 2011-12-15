@@ -54,7 +54,7 @@ public class JpiPlugin implements Plugin<Project> {
         project.plugins.apply(WarPlugin);
         project.plugins.apply(GroovyPlugin);
         def pluginConvention = new JpiPluginConvention();
-        project.convention.plugins["hpi"] = pluginConvention
+        project.convention.plugins["jpi"] = pluginConvention
 
         def warConvention = project.convention.getPlugin(WarPluginConvention);
 
@@ -71,7 +71,7 @@ public class JpiPlugin implements Plugin<Project> {
             task.classpath {
                 ext.runtimeClasspath;
             }
-            task.archiveName = "${ext.shortName}.hpi";
+            task.archiveName = "${ext.shortName}.${ext.fileExtension}";
         }
         project.tasks.withType(ServerTask) { ServerTask task ->
             task.dependsOn {
@@ -82,10 +82,10 @@ public class JpiPlugin implements Plugin<Project> {
             task.destinationDir = ext.getStaplerStubDir()
         }
 
-        def hpi = project.tasks.add(Jpi.TASK_NAME, Jpi);
-        hpi.description = "Generates the HPI package";
-        hpi.group = BasePlugin.BUILD_GROUP;
-        project.extensions.getByType(DefaultArtifactPublicationSet).addCandidate(new ArchivePublishArtifact(hpi));
+        def jpi = project.tasks.add(Jpi.TASK_NAME, Jpi);
+        jpi.description = "Generates the JPI package";
+        jpi.group = BasePlugin.BUILD_GROUP;
+        project.extensions.getByType(DefaultArtifactPublicationSet).addCandidate(new ArchivePublishArtifact(jpi));
 
         def server = project.tasks.add(ServerTask.TASK_NAME, ServerTask);
         server.description = "Run Jenkins in place with the plugin being developed";
