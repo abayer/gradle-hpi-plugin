@@ -28,6 +28,7 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.WarPlugin
 import org.gradle.api.plugins.WarPluginConvention
 import org.gradle.api.plugins.GroovyPlugin
+import org.gradle.api.plugins.MavenPlugin
 
 /**
  * Loads HPI related tasks into the current project.
@@ -52,6 +53,7 @@ public class JpiPlugin implements Plugin<Project> {
     public void apply(final Project project) {
         project.plugins.apply(JavaPlugin);
         project.plugins.apply(WarPlugin);
+        project.plugins.apply(MavenPlugin);
         project.plugins.apply(GroovyPlugin);
         def pluginConvention = new JpiPluginConvention();
         project.convention.plugins["jpi"] = pluginConvention
@@ -97,6 +99,36 @@ public class JpiPlugin implements Plugin<Project> {
 
         project.tasks.compileJava.dependsOn(StaplerGroovyStubsTask.TASK_NAME)
         configureConfigurations(project.configurations);
+
+        // default configuration of uploadArchives Maven task
+        project.tasks.getByName("uploadArchives").doFirst {
+            repositories {
+                mavenDeployer {
+                    // configure this only when the user didn't give any explicit configuration
+                    // whatever in build.gradle should win what we have here
+                    if (repository==null && snapshotRepository==null) {
+                        System.out.println("Deploying to the Jenkins community repository")
+                        def props = loadDotJenkinsOrg()
+
+                        repository(url: "http://maven.jenkins-ci.org:8081/content/repositories/releases") {
+                            authentication(userName:props["userName"], password:props["password"])
+                        }
+                        snapshotRepository(url:"http://maven.jenkins-ci.org:8081/content/repositories/snapshots") {
+                            authentication(userName:props["userName"], password:props["password"])
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    private Properties loadDotJenkinsOrg() {
+        Properties props = new Properties()
+        def dot = new File(new File(System.getProperty("user.home")), ".jenkins-ci.org")
+        if (!dot.exists())
+            throw new Exception("Trying to deploy to Jenkins community repository but there's no credential file ${dot}. See https://wiki.jenkins-ci.org/display/JENKINS/Dot+Jenkins+Ci+Dot+Org")
+        dot.withInputStream { i -> props.load(i) }
+        return props
     }
 
     public void configureConfigurations(ConfigurationContainer cc) {
