@@ -101,7 +101,8 @@ public class JpiPlugin implements Plugin<Project> {
         configureConfigurations(project.configurations);
 
         // default configuration of uploadArchives Maven task
-        project.tasks.getByName("uploadArchives").doFirst {
+        def uploadArchives = project.tasks.getByName("uploadArchives")
+        uploadArchives.doFirst {
             repositories {
                 mavenDeployer {
                     // configure this only when the user didn't give any explicit configuration
@@ -120,6 +121,9 @@ public class JpiPlugin implements Plugin<Project> {
                 }
             }
         }
+
+        // creating alias for making migration from Maven easy.
+        project.tasks.create("deploy").dependsOn(uploadArchives)
     }
     
     private Properties loadDotJenkinsOrg() {
