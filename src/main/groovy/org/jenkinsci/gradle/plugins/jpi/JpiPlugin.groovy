@@ -29,6 +29,8 @@ import org.gradle.api.plugins.WarPlugin
 import org.gradle.api.plugins.WarPluginConvention
 import org.gradle.api.plugins.GroovyPlugin
 import org.gradle.api.plugins.MavenPlugin
+import org.gradle.api.plugins.MavenPluginConvention
+import org.gradle.api.artifacts.maven.Conf2ScopeMappingContainer;
 
 /**
  * Loads HPI related tasks into the current project.
@@ -99,6 +101,10 @@ public class JpiPlugin implements Plugin<Project> {
 
         project.tasks.compileJava.dependsOn(StaplerGroovyStubsTask.TASK_NAME)
         configureConfigurations(project.configurations);
+
+        project.convention.getPlugin(MavenPluginConvention).getConf2ScopeMappings().addMapping(MavenPlugin.PROVIDED_COMPILE_PRIORITY,
+                                                                                               project.configurations[CORE_DEPENDENCY_CONFIGURATION_NAME],
+                                                                                               Conf2ScopeMappingContainer.PROVIDED)
 
         // default configuration of uploadArchives Maven task
         def uploadArchives = project.tasks.getByName("uploadArchives")
