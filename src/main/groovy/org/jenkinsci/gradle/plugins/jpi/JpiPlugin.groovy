@@ -62,6 +62,9 @@ public class JpiPlugin implements Plugin<Project> {
 
         def warConvention = project.convention.getPlugin(WarPluginConvention);
 
+        // never run war as it's useless
+        project.tasks.getByName("war").onlyIf { false }
+
         def ext = new JpiExtension(project)
         project.extensions.jenkinsPlugin = ext;
 
