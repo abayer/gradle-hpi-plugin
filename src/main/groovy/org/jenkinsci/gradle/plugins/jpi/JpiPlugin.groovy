@@ -111,10 +111,10 @@ public class JpiPlugin implements Plugin<Project> {
                         System.out.println("Deploying to the Jenkins community repository")
                         def props = loadDotJenkinsOrg()
 
-                        repository(url: "http://maven.jenkins-ci.org:8081/content/repositories/releases") {
+                        repository(url: ext.repoUrl) {
                             authentication(userName:props["userName"], password:props["password"])
                         }
-                        snapshotRepository(url:"http://maven.jenkins-ci.org:8081/content/repositories/snapshots") {
+                        snapshotRepository(url:ext.snapshotRepoUrl) {
                             authentication(userName:props["userName"], password:props["password"])
                         }
                     }

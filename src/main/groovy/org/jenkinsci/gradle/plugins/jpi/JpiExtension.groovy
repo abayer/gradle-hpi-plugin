@@ -141,6 +141,52 @@ class JpiExtension {
         this.workDir = workDir
     }
 
+    private String repoUrl
+
+    /**
+     * The URL for the Maven repository to deploy the built plugin to.
+     */
+    String getRepoUrl() {
+        return repoUrl ?: 'http://maven.jenkins-ci.org:8081/content/repositories/releases'
+    }
+
+    void setRepoUrl(String repoUrl) {
+        this.repoUrl = repoUrl
+    }
+
+    private String snapshotRepoUrl
+    
+    /**
+     * The URL for the Maven snapshot repository to deploy the built plugin to.
+     */
+    String getSnapshotRepoUrl() {
+        return repoUrl ?: 'http://maven.jenkins-ci.org:8081/content/repositories/snapshots'
+    }
+
+    void setSnapshotRepoUrl(String snapshotRepoUrl) {
+        this.snapshotRepoUrl = snapshotRepoUrl
+    }
+
+
+    /**
+     * Maven repo deployment credentials.
+     */
+    String getJpiDeployUser() {
+        if (project.hasProperty("jpi.deploy.user")) {
+            return project.property("jpi.deploy.user")
+        } else {
+            return ''
+        }
+    }
+    
+    String getJpiDeployPassword() {
+        if (project.hasProperty("jpi.deploy.password")) {
+            return project.property("jpi.deploy.password")
+        } else {
+            return ''
+        }
+    }
+    
     /**
      * Runtime dependencies
      */
