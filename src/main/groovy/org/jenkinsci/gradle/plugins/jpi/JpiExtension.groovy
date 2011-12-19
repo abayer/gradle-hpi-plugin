@@ -128,7 +128,24 @@ class JpiExtension {
         def stubDir = staplerStubDir ?: 'generated-src/stubs'
         project.file("${project.buildDir}/${stubDir}")
     }
+
+    private String localizerDestDir
+
+    /**
+     * Sets the localizer output directory
+     */
+    void setLocalizerDestDir(String localizerDestDir) {
+        this.localizerDestDir = localizerDestDir
+    }
     
+    /**
+     * Returns the localizer dest directory.
+     */
+    File getLocalizerDestDir() {
+        def destDir = localizerDestDir ?: 'generated-src/localizer'
+        project.file("${project.buildDir}/${destDir}")
+    }
+
     private File workDir;
     
     File getWorkDir() {

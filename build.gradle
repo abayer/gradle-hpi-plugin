@@ -1,8 +1,13 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
 
+repositories {
+  mavenCentral()
+}
+
 dependencies {
   compile gradleApi()
+  compile 'org.jvnet.localizer:maven-localizer-plugin:1.12'
   groovy localGroovy()
 }
 

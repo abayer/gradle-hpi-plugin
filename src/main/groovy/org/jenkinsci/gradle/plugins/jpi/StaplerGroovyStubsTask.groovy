@@ -52,7 +52,6 @@ class StaplerGroovyStubsTask extends DefaultTask {
         }
       }
     }
-    project.sourceSets.main.java.srcDirs += destinationDir
   }
 
   

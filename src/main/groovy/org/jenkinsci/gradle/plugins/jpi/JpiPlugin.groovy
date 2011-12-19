@@ -90,6 +90,9 @@ public class JpiPlugin implements Plugin<Project> {
         gradleProject.tasks.withType(StaplerGroovyStubsTask) { StaplerGroovyStubsTask task ->
             task.destinationDir = ext.getStaplerStubDir()
         }
+        gradleProject.tasks.withType(LocalizerTask) { LocalizerTask task ->
+            task.destinationDir = ext.getLocalizerDestDir()
+        }
 
         def jpi = gradleProject.tasks.add(Jpi.TASK_NAME, Jpi);
         jpi.description = "Generates the JPI package";
@@ -104,7 +107,18 @@ public class JpiPlugin implements Plugin<Project> {
         stubs.description = "Generates the Java stubs from Groovy source to enable Stapler annotation processing."
         stubs.group = BasePlugin.BUILD_GROUP
 
+        gradleProject.sourceSets.main.java.srcDirs += ext.getStaplerStubDir()
+
         gradleProject.tasks.compileJava.dependsOn(StaplerGroovyStubsTask.TASK_NAME)
+
+        def localizer = gradleProject.tasks.add(LocalizerTask.TASK_NAME, LocalizerTask)
+        localizer.description = "Generates the Java source for the localizer."
+        localizer.group = BasePlugin.BUILD_GROUP
+
+        gradleProject.sourceSets.main.java.srcDirs += ext.getLocalizerDestDir()
+
+        gradleProject.tasks.compileJava.dependsOn(LocalizerTask.TASK_NAME)
+
         configureConfigurations(gradleProject.configurations);
 
         def mvnConvention = gradleProject.convention.getPlugin(MavenPluginConvention)
