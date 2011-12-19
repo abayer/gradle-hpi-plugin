@@ -93,7 +93,7 @@ class JpiExtension {
     void setCoreVersion(String v) {
         this.coreVersion = v
 
-        project.repositories {
+        project.repositories { 
             mavenLocal()
             mavenCentral()
             maven {
@@ -109,9 +109,11 @@ class JpiExtension {
             )
 
             jenkinsWar(group: 'org.jenkins-ci.main', name: 'jenkins-war', version: v, ext: 'war')
-            jenkinsTest("org.jenkins-ci.main:jenkins-war:${v}@war",
-                        "org.jenkins-ci.main:jenkins-test-harness:${v}@jar",
-                        "org.jenkins-ci.main:ui-samples-plugin:${v}@jar",
+
+            jenkinsTest("org.jenkins-ci.main:jenkins-test-harness:${v}@jar") { transitive = true }
+            jenkinsTest("org.jenkins-ci.main:ui-samples-plugin:${v}@jar",
+                        "org.jenkins-ci.main:maven-plugin:${v}@jar",
+                        "org.jenkins-ci.main:jenkins-war:${v}:war-for-test@jar",
                         "junit:junit-dep:4.10@jar")
         }
     }
