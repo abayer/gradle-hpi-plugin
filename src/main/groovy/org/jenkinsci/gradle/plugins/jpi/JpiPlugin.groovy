@@ -31,6 +31,8 @@ import org.gradle.api.plugins.GroovyPlugin
 import org.gradle.api.plugins.MavenPlugin
 import org.gradle.api.plugins.MavenPluginConvention
 import org.gradle.api.artifacts.maven.Conf2ScopeMappingContainer;
+import org.gradle.api.artifacts.maven.MavenResolver
+import org.gradle.api.artifacts.maven.MavenPom;
 
 /**
  * Loads HPI related tasks into the current project.
@@ -52,23 +54,23 @@ public class JpiPlugin implements Plugin<Project> {
 
     public static final String WEB_APP_GROUP = "web application";
 
-    public void apply(final Project project) {
-        project.plugins.apply(JavaPlugin);
-        project.plugins.apply(WarPlugin);
-        project.plugins.apply(MavenPlugin);
-        project.plugins.apply(GroovyPlugin);
+    public void apply(final Project gradleProject) {
+        gradleProject.plugins.apply(JavaPlugin);
+        gradleProject.plugins.apply(WarPlugin);
+        gradleProject.plugins.apply(MavenPlugin);
+        gradleProject.plugins.apply(GroovyPlugin);
         def pluginConvention = new JpiPluginConvention();
-        project.convention.plugins["jpi"] = pluginConvention
+        gradleProject.convention.plugins["jpi"] = pluginConvention
 
-        def warConvention = project.convention.getPlugin(WarPluginConvention);
+        def warConvention = gradleProject.convention.getPlugin(WarPluginConvention);
 
         // never run war as it's useless
-        project.tasks.getByName("war").onlyIf { false }
+        gradleProject.tasks.getByName("war").onlyIf { false }
 
-        def ext = new JpiExtension(project)
-        project.extensions.jenkinsPlugin = ext;
+        def ext = new JpiExtension(gradleProject)
+        gradleProject.extensions.jenkinsPlugin = ext;
 
-        project.tasks.withType(Jpi) { Jpi task ->
+        gradleProject.tasks.withType(Jpi) { Jpi task ->
             task.from {
                 return warConvention.webAppDir;
             }
@@ -80,37 +82,41 @@ public class JpiPlugin implements Plugin<Project> {
             }
             task.archiveName = "${ext.shortName}.${ext.fileExtension}";
         }
-        project.tasks.withType(ServerTask) { ServerTask task ->
+        gradleProject.tasks.withType(ServerTask) { ServerTask task ->
             task.dependsOn {
                 ext.mainSourceTree().runtimeClasspath
             }
         }
-        project.tasks.withType(StaplerGroovyStubsTask) { StaplerGroovyStubsTask task ->
+        gradleProject.tasks.withType(StaplerGroovyStubsTask) { StaplerGroovyStubsTask task ->
             task.destinationDir = ext.getStaplerStubDir()
         }
 
-        def jpi = project.tasks.add(Jpi.TASK_NAME, Jpi);
+        def jpi = gradleProject.tasks.add(Jpi.TASK_NAME, Jpi);
         jpi.description = "Generates the JPI package";
         jpi.group = BasePlugin.BUILD_GROUP;
-        project.extensions.getByType(DefaultArtifactPublicationSet).addCandidate(new ArchivePublishArtifact(jpi));
+        gradleProject.extensions.getByType(DefaultArtifactPublicationSet).addCandidate(new ArchivePublishArtifact(jpi));
 
-        def server = project.tasks.add(ServerTask.TASK_NAME, ServerTask);
+        def server = gradleProject.tasks.add(ServerTask.TASK_NAME, ServerTask);
         server.description = "Run Jenkins in place with the plugin being developed";
         server.group = BasePlugin.BUILD_GROUP; // TODO
 
-        def stubs = project.tasks.add(StaplerGroovyStubsTask.TASK_NAME, StaplerGroovyStubsTask)
+        def stubs = gradleProject.tasks.add(StaplerGroovyStubsTask.TASK_NAME, StaplerGroovyStubsTask)
         stubs.description = "Generates the Java stubs from Groovy source to enable Stapler annotation processing."
         stubs.group = BasePlugin.BUILD_GROUP
 
-        project.tasks.compileJava.dependsOn(StaplerGroovyStubsTask.TASK_NAME)
-        configureConfigurations(project.configurations);
+        gradleProject.tasks.compileJava.dependsOn(StaplerGroovyStubsTask.TASK_NAME)
+        configureConfigurations(gradleProject.configurations);
 
-        project.convention.getPlugin(MavenPluginConvention).getConf2ScopeMappings().addMapping(MavenPlugin.PROVIDED_COMPILE_PRIORITY,
-                                                                                               project.configurations[CORE_DEPENDENCY_CONFIGURATION_NAME],
-                                                                                               Conf2ScopeMappingContainer.PROVIDED)
+        def mvnConvention = gradleProject.convention.getPlugin(MavenPluginConvention)
+        mvnConvention.getConf2ScopeMappings().addMapping(MavenPlugin.PROVIDED_COMPILE_PRIORITY,
+                                                         gradleProject.configurations[CORE_DEPENDENCY_CONFIGURATION_NAME],
+                                                         Conf2ScopeMappingContainer.PROVIDED)
 
+        def installer = gradleProject.tasks.getByName("install")
+
+        
         // default configuration of uploadArchives Maven task
-        def uploadArchives = project.tasks.getByName("uploadArchives")
+        def uploadArchives = gradleProject.tasks.getByName("uploadArchives")
         uploadArchives.doFirst {
             repositories {
                 mavenDeployer {
@@ -131,8 +137,37 @@ public class JpiPlugin implements Plugin<Project> {
             }
         }
 
+        def mavenUploaders = [installer,uploadArchives]*.repositories*.find { it instanceof MavenResolver }
+
+        mavenUploaders.each { m ->
+            if (m != null) { 
+                m.pom.whenConfigured { p -> 
+                    p.project { 
+                        parent {
+                            groupId 'org.jenkins-ci.plugins'
+                            artifactId 'plugin'
+                            version ext.getCoreVersion()
+                        }
+                        repositories { 
+                            gradleProject.repositories.each { repo ->
+                                if (repo.name == 'MavenRepo' || repo.name == 'MavenLocal') {
+                                    // do not include the Maven Central repository or the local cache.
+                                    return
+                                }
+                                repository {
+                                    id = repo.name
+                                    url = repo.url
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+                
+
         // creating alias for making migration from Maven easy.
-        project.tasks.create("deploy").dependsOn(uploadArchives)
+        gradleProject.tasks.create("deploy").dependsOn(uploadArchives)
     }
     
     private Properties loadDotJenkinsOrg() {

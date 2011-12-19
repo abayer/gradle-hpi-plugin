@@ -97,6 +97,7 @@ class JpiExtension {
             mavenLocal()
             mavenCentral()
             maven {
+                name "m.g.o"
                 delegate.url("http://maven.glassfish.org/content/groups/public/")
             }
         }
