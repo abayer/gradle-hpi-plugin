@@ -56,6 +56,11 @@ public class JpiPlugin implements Plugin<Project> {
      */
     public static final String PLUGINS_DEPENDENCY_CONFIGURATION_NAME = "jenkinsPlugins"
 
+    /**
+     * Represents the Jenkins plugin test dependencies.
+     */
+    public static final String JENKINS_TEST_DEPENDENCY_CONFIGURATION_NAME = "jenkinsTest"
+
     public static final String WEB_APP_GROUP = "web application";
 
     public void apply(final Project gradleProject) {
@@ -206,8 +211,11 @@ public class JpiPlugin implements Plugin<Project> {
                 setDescription("Jenkins core that your plugin is built against");
         Configuration jenkinsPluginsConfiguration = cc.add(PLUGINS_DEPENDENCY_CONFIGURATION_NAME).setVisible(false).
                 setDescription("Jenkins plugins which your plugin is built against");
+        Configuration jenkinsTestConfiguration = cc.add(JENKINS_TEST_DEPENDENCY_CONFIGURATION_NAME).setVisible(false).
+                setDescription("Jenkins plugin test dependencies.");
         cc.getByName(WarPlugin.PROVIDED_COMPILE_CONFIGURATION_NAME).extendsFrom(jenkinsCoreConfiguration);
         cc.getByName(WarPlugin.PROVIDED_COMPILE_CONFIGURATION_NAME).extendsFrom(jenkinsPluginsConfiguration);
+        cc.getByName(JavaPlugin.TEST_COMPILE_CONFIGURATION_NAME).extendsFrom(jenkinsTestConfiguration);
 
         cc.add(WAR_DEPENDENCY_CONFIGURATION_NAME).setVisible(false).
                 setDescription("Jenkins war that corresponds to the Jenkins core");

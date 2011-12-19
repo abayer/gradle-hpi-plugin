@@ -109,6 +109,10 @@ class JpiExtension {
             )
 
             jenkinsWar(group: 'org.jenkins-ci.main', name: 'jenkins-war', version: v, ext: 'war')
+            jenkinsTest("org.jenkins-ci.main:jenkins-war:${v}@war",
+                        "org.jenkins-ci.main:jenkins-test-harness:${v}@jar",
+                        "org.jenkins-ci.main:ui-samples-plugin:${v}@jar",
+                        "junit:junit-dep:4.10@jar")
         }
     }
     
