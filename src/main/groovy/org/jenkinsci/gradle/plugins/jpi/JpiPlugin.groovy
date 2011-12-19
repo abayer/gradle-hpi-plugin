@@ -51,6 +51,10 @@ public class JpiPlugin implements Plugin<Project> {
      */
     public static final String WAR_DEPENDENCY_CONFIGURATION_NAME = "jenkinsWar";
 
+    /**
+     * Represents the dependencies on other Jenkins plugins.
+     */
+    public static final String PLUGINS_DEPENDENCY_CONFIGURATION_NAME = "jenkinsPlugins"
 
     public static final String WEB_APP_GROUP = "web application";
 
@@ -126,6 +130,10 @@ public class JpiPlugin implements Plugin<Project> {
                                                          gradleProject.configurations[CORE_DEPENDENCY_CONFIGURATION_NAME],
                                                          Conf2ScopeMappingContainer.PROVIDED)
 
+        mvnConvention.getConf2ScopeMappings().addMapping(MavenPlugin.PROVIDED_COMPILE_PRIORITY,
+                                                         gradleProject.configurations[PLUGINS_DEPENDENCY_CONFIGURATION_NAME],
+                                                         Conf2ScopeMappingContainer.PROVIDED)
+
         def installer = gradleProject.tasks.getByName("install")
 
         
@@ -196,7 +204,10 @@ public class JpiPlugin implements Plugin<Project> {
     public void configureConfigurations(ConfigurationContainer cc) {
         Configuration jenkinsCoreConfiguration = cc.add(CORE_DEPENDENCY_CONFIGURATION_NAME).setVisible(false).
                 setDescription("Jenkins core that your plugin is built against");
+        Configuration jenkinsPluginsConfiguration = cc.add(PLUGINS_DEPENDENCY_CONFIGURATION_NAME).setVisible(false).
+                setDescription("Jenkins plugins which your plugin is built against");
         cc.getByName(WarPlugin.PROVIDED_COMPILE_CONFIGURATION_NAME).extendsFrom(jenkinsCoreConfiguration);
+        cc.getByName(WarPlugin.PROVIDED_COMPILE_CONFIGURATION_NAME).extendsFrom(jenkinsPluginsConfiguration);
 
         cc.add(WAR_DEPENDENCY_CONFIGURATION_NAME).setVisible(false).
                 setDescription("Jenkins war that corresponds to the Jenkins core");
