@@ -29,3 +29,7 @@ jenkinsPlugin {
 //     jenkinsPlugins([group: 'org.jenkins-ci.plugins', name: 'token-macro', version: '1.0', ext: 'jar'])
 // Make sure to specify the "jar", and to add them to the jenkinsPlugins configuration. That configuration will be included in
 // compile-time classpaths, but will be excluded from the resulting plugin bundle and Maven POM, as intended.
+
+
+// To deploy a plugin to the Jenkins Maven repository, run "gradle deploy". You will need to have your credentials
+// configured in a file, ~/.jenkins-ci.org, with the properties "userName" and "password" specified within.
