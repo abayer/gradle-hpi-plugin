@@ -1,6 +1,6 @@
 /**
- * Rough demo of gradle HPI plugin. Clone git://github.com/jenkinsci/hello-world-plugin.git, copy this into
- * the cloned repo, and run "gradle hpi".
+ * Rough demo of gradle HPI/JPI plugin. Clone git://github.com/jenkinsci/hello-world-plugin.git, copy this into
+ * the cloned repo, and run "gradle jpi".
  */
 buildscript {
   repositories {
@@ -20,3 +20,12 @@ jenkinsPlugin {
     coreVersion = '1.409'
     displayName = 'Our first gradle plugin'
 }
+
+// If specifying additional repositories, do so *after* applying the jpi plugin and and specifying the core version.
+// Otherwise, the additional repositories will end up ahead of mavenLocal, mavenCentral and the Jenkins repo, and will get
+// hit for every possible artifact, slowing down resolution considerably.
+
+// If depending on other Jenkins plugins, add them to your dependencies like this:
+//     jenkinsPlugins([group: 'org.jenkins-ci.plugins', name: 'token-macro', version: '1.0', ext: 'jar'])
+// Make sure to specify the "jar", and to add them to the jenkinsPlugins configuration. That configuration will be included in
+// compile-time classpaths, but will be excluded from the resulting plugin bundle and Maven POM, as intended.
