@@ -188,6 +188,7 @@ public class JpiPlugin implements Plugin<Project> {
                         }
                         url ext.url
                         description gradleProject.description
+                        name ext.getDisplayName()
                         repositories { 
                             gradleProject.repositories.each { repo ->
                                 if (repo.name == 'MavenRepo' || repo.name == 'MavenLocal') {
