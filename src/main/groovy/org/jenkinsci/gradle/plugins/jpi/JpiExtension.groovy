@@ -224,5 +224,9 @@ class JpiExtension {
                 .sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
     }
 
+    public SourceSet testSourceTree() {
+        return project.convention.getPlugin(JavaPluginConvention)
+                .sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME)
+    }
 
 }

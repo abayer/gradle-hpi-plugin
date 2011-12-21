@@ -36,16 +36,8 @@ class ServerTask extends DefaultTask {
     }
 
     void generateHpl() {
+        def m = new JpiHplManifest(project)
         def conv = project.extensions.getByType(JpiExtension)
-
-        def m = new JpiManifest(project)
-
-        // src/main/webApp
-        def warconv = project.convention.getPlugin(WarPluginConvention);
-        m["Resource-Path"] = warconv.webAppDir.getAbsolutePath()
-
-        // add resource directories directly so that we can pick up the source, then add all the jars and class path
-        m["Libraries"] = (conv.mainSourceTree().resources.srcDirs + conv.runtimeClasspath.getFiles()).join(",")
 
         def hpl = new File(conv.workDir, "plugins/${conv.shortName}.hpl")
         hpl.parentFile.mkdirs()

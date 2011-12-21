@@ -152,7 +152,6 @@ public class JpiPlugin implements Plugin<Project> {
 
         def installer = gradleProject.tasks.getByName("install")
 
-        
         // default configuration of uploadArchives Maven task
         def uploadArchives = gradleProject.tasks.getByName("uploadArchives")
         uploadArchives.doFirst {
@@ -209,6 +208,14 @@ public class JpiPlugin implements Plugin<Project> {
 
         // creating alias for making migration from Maven easy.
         gradleProject.tasks.create("deploy").dependsOn(uploadArchives)
+
+        // generate test hpl manifest for the current plugin, to be used during unit test
+        def generateTestHpl = gradleProject.tasks.create("generate-test-hpl") << {
+            def hpl = new File(ext.testSourceTree().output.classesDir, "the.hpl")
+            hpl.parentFile.mkdirs()
+            new JpiHplManifest(gradleProject).writeTo(hpl)
+        }
+        gradleProject.tasks.getByName("test").dependsOn(generateTestHpl)
     }
     
     private Properties loadDotJenkinsOrg() {

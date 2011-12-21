@@ -6,6 +6,7 @@ import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.plugins.WarPluginConvention
 
 /**
  * Encapsulates the Jenkins plugin manifest and its generation.
