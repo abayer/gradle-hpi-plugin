@@ -4,6 +4,8 @@ import java.text.SimpleDateFormat
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.tasks.SourceSet
+import org.gradle.api.artifacts.ResolvedArtifact
+import org.gradle.api.artifacts.Configuration
 
 /**
  * Encapsulates the Jenkins plugin manifest and its generation.
@@ -44,10 +46,9 @@ class JpiManifest extends HashMap<String,Object> {
 
         this["Mask-Classes"] = conv.maskClasses;
 
-        // TODO
-        // String dep = findDependencyProjects();
-        // if(dep.length()>0)
-        //    attrs["Plugin-Dependencies"] = dep;
+        def dep = findDependencyProjects(project);
+        if(dep.length()>0)
+            this["Plugin-Dependencies"] = dep;
 
         // more TODO
 /*
@@ -67,6 +68,30 @@ class JpiManifest extends HashMap<String,Object> {
             if (itr.next().value==null) itr.remove();
         }
     }
+    
+    private String findDependencyProjects(Project project) {
+        def buf = new StringBuilder();
+
+        listUpDependencies(project.configurations.getByName(JpiPlugin.PLUGINS_DEPENDENCY_CONFIGURATION_NAME), false, buf)
+        listUpDependencies(project.configurations.getByName(JpiPlugin.OPTIONAL_PLUGINS_DEPENDENCY_CONFIGURATION_NAME), true, buf)
+
+        return buf.toString();
+    }
+
+    private listUpDependencies(Configuration c, boolean optional, StringBuilder buf) {
+        for (ResolvedArtifact a: c.resolvedConfiguration.resolvedArtifacts) {
+            if (buf.length() > 0)
+                buf.append(',');
+            buf.append(a.moduleVersion.id.name);
+            buf.append(':');
+            buf.append(a.moduleVersion.id.version);
+            if (optional) {
+                buf.append(";resolution:=optional");
+            }
+        }
+    }
+
+
 
     public void writeTo(File f) {
         def m = new java.util.jar.Manifest()

@@ -57,6 +57,13 @@ public class JpiPlugin implements Plugin<Project> {
     public static final String PLUGINS_DEPENDENCY_CONFIGURATION_NAME = "jenkinsPlugins"
 
     /**
+     * Represents the dependencies on other Jenkins plugins.
+     *
+     * Using a separate configuration until we see GRADLE-1749.
+     */
+    public static final String OPTIONAL_PLUGINS_DEPENDENCY_CONFIGURATION_NAME = "optionalJenkinsPlugins"
+
+    /**
      * Represents the Jenkins plugin test dependencies.
      */
     public static final String JENKINS_TEST_DEPENDENCY_CONFIGURATION_NAME = "jenkinsTest"
@@ -131,12 +138,16 @@ public class JpiPlugin implements Plugin<Project> {
         configureConfigurations(gradleProject.configurations);
 
         def mvnConvention = gradleProject.convention.getPlugin(MavenPluginConvention)
-        mvnConvention.getConf2ScopeMappings().addMapping(MavenPlugin.PROVIDED_COMPILE_PRIORITY,
+        mvnConvention.conf2ScopeMappings.addMapping(MavenPlugin.PROVIDED_COMPILE_PRIORITY,
                                                          gradleProject.configurations[CORE_DEPENDENCY_CONFIGURATION_NAME],
                                                          Conf2ScopeMappingContainer.PROVIDED)
 
-        mvnConvention.getConf2ScopeMappings().addMapping(MavenPlugin.PROVIDED_COMPILE_PRIORITY,
+        mvnConvention.conf2ScopeMappings.addMapping(MavenPlugin.PROVIDED_COMPILE_PRIORITY,
                                                          gradleProject.configurations[PLUGINS_DEPENDENCY_CONFIGURATION_NAME],
+                                                         Conf2ScopeMappingContainer.PROVIDED)
+
+        mvnConvention.conf2ScopeMappings.addMapping(MavenPlugin.PROVIDED_COMPILE_PRIORITY,
+                                                         gradleProject.configurations[OPTIONAL_PLUGINS_DEPENDENCY_CONFIGURATION_NAME],
                                                          Conf2ScopeMappingContainer.PROVIDED)
 
         def installer = gradleProject.tasks.getByName("install")
@@ -213,10 +224,13 @@ public class JpiPlugin implements Plugin<Project> {
                 setDescription("Jenkins core that your plugin is built against");
         Configuration jenkinsPluginsConfiguration = cc.add(PLUGINS_DEPENDENCY_CONFIGURATION_NAME).setVisible(false).
                 setDescription("Jenkins plugins which your plugin is built against");
+        Configuration optionalJenkinsPluginsConfiguration = cc.add(OPTIONAL_PLUGINS_DEPENDENCY_CONFIGURATION_NAME).setVisible(false).
+                setDescription("Optional Jenkins plugins dependencies which your plugin is built against");
         Configuration jenkinsTestConfiguration = cc.add(JENKINS_TEST_DEPENDENCY_CONFIGURATION_NAME).setVisible(false).
                 setDescription("Jenkins plugin test dependencies.");
         cc.getByName(WarPlugin.PROVIDED_COMPILE_CONFIGURATION_NAME).extendsFrom(jenkinsCoreConfiguration);
         cc.getByName(WarPlugin.PROVIDED_COMPILE_CONFIGURATION_NAME).extendsFrom(jenkinsPluginsConfiguration);
+        cc.getByName(WarPlugin.PROVIDED_COMPILE_CONFIGURATION_NAME).extendsFrom(optionalJenkinsPluginsConfiguration);
         cc.getByName(JavaPlugin.TEST_COMPILE_CONFIGURATION_NAME).extendsFrom(jenkinsTestConfiguration);
 
         cc.add(WAR_DEPENDENCY_CONFIGURATION_NAME).setVisible(false).
