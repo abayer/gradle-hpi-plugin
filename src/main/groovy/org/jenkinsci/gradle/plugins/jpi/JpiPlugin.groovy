@@ -175,6 +175,8 @@ public class JpiPlugin implements Plugin<Project> {
                             artifactId 'plugin'
                             version ext.getCoreVersion()
                         }
+                        url ext.url
+                        description gradleProject.description
                         repositories { 
                             gradleProject.repositories.each { repo ->
                                 if (repo.name == 'MavenRepo' || repo.name == 'MavenLocal') {
