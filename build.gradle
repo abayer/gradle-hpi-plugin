@@ -1,5 +1,6 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
+apply plugin: 'signing'
 
 repositories {
   mavenCentral()
@@ -9,6 +10,72 @@ dependencies {
   compile gradleApi()
   compile 'org.jvnet.localizer:maven-localizer-plugin:1.12'
   groovy localGroovy()
+}
+
+artifacts {
+  archives jar
+}
+
+signing {
+  sign configurations.archives
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { MavenDeployment deployment -> signPom(deployment) }
+      
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: sonatypeUsername, password: sonatypePassword)
+      }
+ 
+      pom.project {
+        name 'Gradle JPI Plugin'
+        packaging 'jar'
+        description 'The Gradle JPI plugin is a Gradle plugin for building Jenkins plugins'
+        url 'http://github.com/jenkinsci/gradle-jpi-plugin'
+ 
+        scm {
+          url 'scm:git@github.com:jenkinsci/gradle-jpi-plugin.git'
+          connection 'scm:git@github.com:jenkinsci/gradle-jpi-plugin.git'
+          developerConnection 'scm:git@github.com:jenkinsci/gradle-jpi-plugin.git'
+        }
+        
+        licenses {
+          license {
+                name 'The MIT license'
+                url 'http://www.opensource.org/licenses/mit-license.php'
+                distribution 'repo'
+          }
+        }
+        developers {
+          developer {
+            id 'abayer'
+            name 'Andrew Bayer'
+          }
+          developer {
+            id 'kohsuke'
+            name 'Kohsuke Kawaguchi'
+          }
+        }
+      }
+      
+      //mess with the generated pom to set the 'packaging' tag
+      pom.withXml { XmlProvider xmlProvider ->
+        def xml = xmlProvider.asString()
+        def pomXml = new XmlParser().parse(new ByteArrayInputStream(xml.toString().bytes))
+        
+        pomXml.version[0] + { packaging('jar') }
+        
+        def newXml = new StringWriter()
+        def printer = new XmlNodePrinter(new PrintWriter(newXml))
+        printer.preserveWhitespace = true
+        printer.print(pomXml)
+        xml.setLength(0)
+        xml.append(newXml.toString())
+      }
+    }
+  }
 }
 
 group = 'org.jenkins-ci.tools'
