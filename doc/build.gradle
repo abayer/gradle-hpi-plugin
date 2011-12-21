@@ -5,7 +5,7 @@
 buildscript {
   repositories {
     mavenCentral()
-    mavenLocal()
+    mavenLocal() // mavenLocal() is only in here until the plugin has been released to Maven Central.
   }
   dependencies {
     classpath group: 'org.jenkins-ci.tools', name: 'gradle-jpi-plugin', version: '0.1-SNAPSHOT'
@@ -14,11 +14,14 @@ buildscript {
 
 group = "org.jenkinsci.plugins"
 version = "1.0-SNAPSHOT"
+description = "This is a sample plugin, built with Gradle."
+
 apply plugin: 'jpi'
 
 jenkinsPlugin {
-    coreVersion = '1.409'
-    displayName = 'Our first gradle plugin'
+    coreVersion = '1.409'                                               // Version of Jenkins core this plugin depends on.
+    displayName = 'Hello World plugin built with Gradle'                // Human-readable name of plugin.
+    url = 'http://wiki.jenkins-ci.org/display/JENKINS/SomePluginPage'   // URL for plugin on Jenkins wiki or elsewhere.
 }
 
 // If specifying additional repositories, do so *after* applying the jpi plugin and and specifying the core version.
